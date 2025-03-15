@@ -1,0 +1,129 @@
+
+//1. Entities (Varlıklar) Katmanı
+
+public class ProgrammingLanguage
+{
+    public int Id { get; set; }
+    public string Name { get; set; }  // Örn: "C#", "Java", "Python"
+}
+
+
+public class Technology
+{
+    public int Id { get; set; }
+    public string Name { get; set; } 
+    public ProgrammingLanguage ProgrammingLanguage { get; set; }  
+}
+//2. Data Access (Veri Erişim) Katmanı
+
+
+public interface IProgrammingLanguageRepository
+{
+    void Add(ProgrammingLanguage programmingLanguage);
+    List<ProgrammingLanguage> GetAll();
+    ProgrammingLanguage GetById(int id);
+    void Update(ProgrammingLanguage programmingLanguage);
+    void Delete(int id);
+}
+
+
+public interface ITechnologyRepository
+{
+    void Add(Technology technology);
+    List<Technology> GetAll();
+    Technology GetById(int id);
+    void Update(Technology technology);
+    void Delete(int id);
+}
+
+public class ProgrammingLanguageRepository : IProgrammingLanguageRepository
+{
+    private List<ProgrammingLanguage> _programmingLanguages = new List<ProgrammingLanguage>();
+
+    public void Add(ProgrammingLanguage programmingLanguage)
+    {
+        _programmingLanguages.Add(programmingLanguage);
+    }
+
+    public List<ProgrammingLanguage> GetAll()
+    {
+        return _programmingLanguages;
+    }
+
+    public ProgrammingLanguage GetById(int id)
+    {
+        return _programmingLanguages.FirstOrDefault(p => p.Id == id);
+    }
+
+    public void Update(ProgrammingLanguage programmingLanguage)
+    {
+        var existing = _programmingLanguages.FirstOrDefault(p => p.Id == programmingLanguage.Id);
+        if (existing != null)
+        {
+            existing.Name = programmingLanguage.Name;
+        }
+    }
+
+    public void Delete(int id)
+    {
+        var programmingLanguage = _programmingLanguages.FirstOrDefault(p => p.Id == id);
+        if (programmingLanguage != null)
+        {
+            _programmingLanguages.Remove(programmingLanguage);
+        }
+    }
+}
+//3. Business (İş Mantığı) Katmanı
+
+public class ProgrammingLanguageService
+{
+    private readonly IProgrammingLanguageRepository _programmingLanguageRepository;
+
+    public ProgrammingLanguageService(IProgrammingLanguageRepository programmingLanguageRepository)
+    {
+        _programmingLanguageRepository = programmingLanguageRepository;
+    }
+
+    public void Add(ProgrammingLanguage programmingLanguage)
+    {
+        _programmingLanguageRepository.Add(programmingLanguage);
+    }
+
+    public List<ProgrammingLanguage> GetAll()
+    {
+        return _programmingLanguageRepository.GetAll();
+    }
+
+  
+}
+
+//4. Core Katmanı
+
+public class ValidationHelper
+{
+    public static bool ValidateName(string name)
+    {
+        return !string.IsNullOrEmpty(name);
+    }
+}
+//5. Presentation (Sunum) Katmanı
+using System;
+
+class Program
+{
+    static void Main()
+    {
+        
+        var programmingLanguageRepository = new ProgrammingLanguageRepository();
+        var programmingLanguageService = new ProgrammingLanguageService(programmingLanguageRepository);
+
+        Console.Write("Enter the programming language name: ");
+        string name = Console.ReadLine();
+
+    
+        var programmingLanguage = new ProgrammingLanguage { Id = 1, Name = name };
+        programmingLanguageService.Add(programmingLanguage);
+
+        Console.WriteLine($"Programming language {name} has been added.");
+    }
+}
